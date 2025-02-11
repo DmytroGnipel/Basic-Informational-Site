@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./root/styles.css" />
+    <script defer src="./root/script.js"></script>
+    <title>{% get title %}</title>
+  </head>
+  <body>
+    <div id="wrapper">
+      <header>{% get header %}</header>
+      <div id="container">
+        <main>{% get content %}</main>
+        <aside>{% get aside %}</aside>
+      </div>
+      <footer>{% get footer %}</footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "basic-informational-site",
+  "version": "1.0.0",
+  "description": "Another project from theodinproject.com",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gnipel Dmytro",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "prettier": "3.5.0"
+  }
+}
