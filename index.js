@@ -1,62 +1,47 @@
 import fs from "fs";
-import http from "http";
-import getMimeType from "./getMimeType.js";
+import express from "express";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 
-http
-  .createServer(async (req, res) => {
-    let output;
-    let path;
-    let status = 200;
-    try {
-      //remove extension from req.url and get path without extension
-      if (Array.isArray(req.url.match(/\.[a-z]+$/))) {
-        path = req.url.slice(1);
-        output = await fs.promises.readFile(path);
-      }
-      //get path and output when request points to html-document
-      else {
-        let layoutPath = "layout.html";
-        let titlePath;
-        let contentPath;
-        //when request points to main page
-        if (req.url === "/") {
-          titlePath = "page/index/title.html";
-          contentPath = "page/index/content.html";
-        }
-        //when request points to not main page
-        else {
-          titlePath = "page" + req.url + "/title.html";
-          contentPath = "page" + req.url + "/content.html";
-        }
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-        let headerPath = "elems/header.html";
-        let asidePath = "elems/aside.html";
-        let footerPath = "elems/footer.html";
+const app = express();
 
-        let layout = await fs.promises.readFile(layoutPath, "utf8");
-        let title = await fs.promises.readFile(titlePath, "utf8");
-        let content = await fs.promises.readFile(contentPath, "utf8");
-        let header = await fs.promises.readFile(headerPath, "utf8");
-        let aside = await fs.promises.readFile(asidePath, "utf8");
-        let footer = await fs.promises.readFile(footerPath, "utf8");
+app.get("/(:pagename)?", async (req, res) => {
+  //check wether is :pagename or not, if not then :pagename = 'index'
+  //to get path to page/index/content.html and page/index/title.html
+  let name = req.params.pagename ?? "index";
 
-        layout = layout.replace(/{% get title %}/, title);
-        layout = layout.replace(/{% get content %}/, content);
-        layout = layout.replace(/{% get header %}/, header);
-        layout = layout.replace(/{% get aside %}/, aside);
-        layout = layout.replace(/{% get footer %}/, footer);
+  //if request is point to images, css, client js etc.
+  if (name.match(/\.[a-z]+$/)) {
+    res.sendFile(__dirname + "/root/" + name);
+  } else {
+    //if request is point to html-page
+    let titlePath = "page/" + name + "/title.html";
+    let contentPath = "page/" + name + "/content.html";
 
-        output = layout;
-        path = layoutPath;
-      }
-    } catch (err) {
-      status = 404;
-      path = "page/404.html";
-      output = await fs.promises.readFile(path, "utf8");
-    }
+    let layoutPath = "layout.html";
+    let headerPath = "elems/header.html";
+    let asidePath = "elems/aside.html";
+    let footerPath = "elems/footer.html";
 
-    res.writeHead(status, { "Content-Type": getMimeType(path) });
-    res.write(output);
-    res.end();
-  })
-  .listen(8080);
+    let layout = await fs.promises.readFile(layoutPath, "utf8");
+    let header = await fs.promises.readFile(headerPath, "utf8");
+    let aside = await fs.promises.readFile(asidePath, "utf8");
+    let footer = await fs.promises.readFile(footerPath, "utf8");
+    let title = await fs.promises.readFile(titlePath, "utf8");
+    let content = await fs.promises.readFile(contentPath, "utf8");
+
+    layout = layout.replace(/{% get title %}/, title);
+    layout = layout.replace(/{% get content %}/, content);
+    layout = layout.replace(/{% get header %}/, header);
+    layout = layout.replace(/{% get aside %}/, aside);
+    layout = layout.replace(/{% get footer %}/, footer);
+
+    res.send(layout);
+  }
+});
+
+app.listen(3000, () => {
+  console.log("I am running");
+});
